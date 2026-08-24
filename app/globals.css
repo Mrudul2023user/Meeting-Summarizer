@@ -153,6 +153,15 @@
   }
 }
 
+.transcript strong {
+  display: none;
+}
+
+.transcript p {
+  margin: 0;
+  padding-bottom: 1.25rem;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
