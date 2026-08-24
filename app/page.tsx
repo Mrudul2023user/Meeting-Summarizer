@@ -1,47 +1,55 @@
+'use client'
+
+import { useMemo, useRef, useState } from 'react'
+import { CalendarDays, Check, ChevronDown, Clock3, FileAudio, Inbox, LayoutDashboard, Menu, Mic2, MoreHorizontal, Play, Search, Settings, Sparkles, Upload, Users, X } from 'lucide-react'
+
+const demoMeetings = [
+  { title: 'Q3 Product Roadmap', date: 'Today, 10:30 AM', duration: '42 min', type: 'Leadership sync', active: true },
+  { title: 'Design critique — Mobile onboarding', date: 'Yesterday, 2:00 PM', duration: '58 min', type: 'Design review' },
+  { title: 'Customer advisory board', date: 'Aug 18, 9:00 AM', duration: '36 min', type: 'Customer call' },
+  { title: 'Weekly team standup', date: 'Aug 15, 9:30 AM', duration: '18 min', type: 'Team ritual' },
+]
+
+const actions = [
+  ['Finalize Q3 launch brief', 'Maya Chen', 'Due Friday', 'coral'],
+  ['Share onboarding research notes', 'Jon Bell', 'Due Aug 28', 'blue'],
+  ['Schedule pricing workshop', 'Alex Morgan', 'Due Sep 02', 'amber'],
+]
+
 export default function Page() {
-  return (
-    <main
-      style={{
-        colorScheme: 'light dark',
-        position: 'relative',
-        display: 'flex',
-        minHeight: '100vh',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'light-dark(#fff, #000)',
-        color: 'light-dark(#000, #fff)',
-      }}
-    >
-      <svg
-        aria-hidden="true"
-        style={{ width: 80, height: 80 }}
-        width={80}
-        height={80}
-        fill="none"
-        viewBox="0 0 20 20"
-        xmlns="http://www.w3.org/2000/svg"
-        stroke="currentColor"
-        strokeWidth="0.5"
-      >
-        <path
-          d="M14.2 14.2H17V6.9375C17 4.76288 15.2371 3 13.0625 3H5.8V5.8M14.2 14.2V7.79063L7.79062 14.2H14.2ZM14.2 14.2V17H6.9375C4.76288 17 3 15.2371 3 13.0625V5.8H5.8M5.8 5.8V12.2313L12.2313 5.8H5.8Z"
-          strokeLinejoin="round"
-        />
-      </svg>
-      <p
-        style={{
-          position: 'absolute',
-          left: '50%',
-          top: 'calc(50% + 56px)',
-          transform: 'translateX(-50%)',
-          whiteSpace: 'nowrap',
-          fontSize: '14px',
-          fontWeight: 500,
-          color: 'light-dark(#71717a, #a1a1aa)',
-        }}
-      >
-        Your v0 generation will show here.
-      </p>
-    </main>
-  )
+  const [mobileNav, setMobileNav] = useState(false)
+  const [query, setQuery] = useState('')
+  const [tab, setTab] = useState('Summary')
+  const [uploading, setUploading] = useState(false)
+  const input = useRef<HTMLInputElement>(null)
+  const filtered = useMemo(() => demoMeetings.filter((m) => m.title.toLowerCase().includes(query.toLowerCase())), [query])
+
+  async function handleUpload(file?: File) {
+    if (!file) return
+    setUploading(true)
+    try {
+      const data = new FormData(); data.append('file', file)
+      await fetch('/api/upload', { method: 'POST', body: data })
+    } finally { setTimeout(() => setUploading(false), 900) }
+  }
+
+  return <main className="min-h-screen bg-background text-foreground">
+    <div className="flex min-h-screen">
+      <aside className={`${mobileNav ? 'translate-x-0' : '-translate-x-full'} fixed inset-y-0 left-0 z-20 flex w-72 flex-col border-r border-border bg-sidebar p-5 transition-transform lg:static lg:translate-x-0`}>
+        <div className="flex items-center justify-between px-2"><div className="flex items-center gap-3"><div className="grid size-9 place-items-center rounded-xl bg-primary text-primary-foreground"><Mic2 size={18}/></div><span className="font-semibold tracking-tight">sonora</span></div><button className="lg:hidden" onClick={() => setMobileNav(false)} aria-label="Close navigation"><X size={20}/></button></div>
+        <div className="mt-10 space-y-1"><p className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-[.16em] text-muted-foreground">Workspace</p><Nav icon={<LayoutDashboard size={17}/>} label="Overview" active/><Nav icon={<Inbox size={17}/>} label="My meetings" badge="12"/><Nav icon={<Users size={17}/>} label="Shared with me"/></div>
+        <div className="mt-9 space-y-1"><p className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-[.16em] text-muted-foreground">Manage</p><Nav icon={<Sparkles size={17}/>} label="Insights"/><Nav icon={<Settings size={17}/>} label="Settings"/></div>
+        <div className="mt-auto rounded-2xl bg-accent p-4"><div className="mb-3 flex items-center gap-2 text-sm font-medium"><Sparkles size={15}/> Pro plan</div><p className="text-xs leading-5 text-muted-foreground">You&apos;ve used 68% of your monthly transcription time.</p><div className="mt-3 h-1.5 rounded-full bg-background"><div className="h-full w-[68%] rounded-full bg-primary"/></div><button className="mt-4 text-xs font-semibold text-primary">Manage plan →</button></div>
+      </aside>
+      {mobileNav && <button className="fixed inset-0 z-10 bg-foreground/20 lg:hidden" onClick={() => setMobileNav(false)} aria-label="Close menu overlay"/>}
+      <section className="min-w-0 flex-1"><header className="flex h-20 items-center justify-between border-b border-border px-5 md:px-10"><div className="flex items-center gap-3"><button className="lg:hidden" onClick={() => setMobileNav(true)} aria-label="Open navigation"><Menu size={21}/></button><div><p className="text-xs text-muted-foreground">Wednesday, August 20, 2025</p><h1 className="text-xl font-semibold tracking-tight md:text-2xl">Good morning, Alex</h1></div></div><div className="flex items-center gap-3"><button className="hidden rounded-lg border border-border p-2 text-muted-foreground sm:block" aria-label="Search"><Search size={18}/></button><button className="grid size-9 place-items-center rounded-full bg-primary text-sm font-semibold text-primary-foreground" aria-label="Account menu">AM</button></div></header>
+        <div className="mx-auto max-w-[1380px] space-y-8 p-5 md:p-10"><div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="mb-2 text-sm font-medium text-primary">Your workspace</p><h2 className="text-3xl font-semibold tracking-[-.04em] md:text-4xl">Meeting intelligence</h2><p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">Everything important from your conversations, organized and ready for what comes next.</p></div><button onClick={() => input.current?.click()} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:opacity-90"><Upload size={17}/>{uploading ? 'Uploading…' : 'Upload meeting'}</button><input ref={input} className="hidden" type="file" accept="audio/*,video/*" onChange={(e) => handleUpload(e.target.files?.[0])}/></div>
+          <div className="grid gap-4 sm:grid-cols-3"><Stat label="Meetings this month" value="24" change="+18%" icon={<CalendarDays size={18}/>}/><Stat label="Time saved" value="14.6h" change="+2.4h" icon={<Clock3 size={18}/>}/><Stat label="Open action items" value="18" change="3 due soon" icon={<Check size={18}/>}/></div>
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(300px,.8fr)]"><section className="rounded-2xl border border-border bg-card p-5 md:p-7"><div className="flex flex-wrap items-center justify-between gap-3"><div><div className="flex items-center gap-2"><span className="size-2 rounded-full bg-primary"/><p className="text-xs font-semibold uppercase tracking-[.14em] text-primary">Latest meeting</p></div><h3 className="mt-3 text-2xl font-semibold tracking-tight">Q3 Product Roadmap</h3><p className="mt-1 text-sm text-muted-foreground">Today, 10:30 AM · 42 minutes · 6 participants</p></div><button className="rounded-lg p-2 text-muted-foreground" aria-label="More options"><MoreHorizontal size={20}/></button></div><div className="mt-7 flex flex-wrap gap-2 border-b border-border">{['Summary','Transcript','Action items'].map((item) => <button key={item} onClick={() => setTab(item)} className={`border-b-2 px-1 pb-3 text-sm font-medium ${tab === item ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground'}`}>{item}</button>)}</div>{tab === 'Summary' && <div className="space-y-6 pt-6"><div><h4 className="font-semibold">Executive summary</h4><p className="mt-2 text-sm leading-6 text-muted-foreground">The team aligned on the Q3 roadmap, prioritizing the mobile onboarding refresh and team collaboration features. Launch timing is set for late September, with a focused beta beginning next week.</p></div><div><h4 className="font-semibold">Key decisions</h4><ul className="mt-3 space-y-3 text-sm text-muted-foreground"><li className="flex gap-3"><span className="mt-1 grid size-4 shrink-0 place-items-center rounded-full bg-primary/15 text-primary"><Check size={11}/></span>Ship the mobile onboarding refresh in the first September release.</li><li className="flex gap-3"><span className="mt-1 grid size-4 shrink-0 place-items-center rounded-full bg-primary/15 text-primary"><Check size={11}/></span>Invite 20 customers to the private beta next Tuesday.</li><li className="flex gap-3"><span className="mt-1 grid size-4 shrink-0 place-items-center rounded-full bg-primary/15 text-primary"><Check size={11}/></span>Keep the current pricing model through Q3.</li></ul></div></div>}{tab === 'Transcript' && <div className="space-y-5 pt-6 text-sm"><p className="rounded-xl bg-accent p-4 leading-6 text-muted-foreground"><strong className="text-foreground">Maya Chen · 10:34</strong><br/>Let&apos;s focus today on what has to be true for the September release.</p><p className="rounded-xl border border-border p-4 leading-6 text-muted-foreground"><strong className="text-foreground">Alex Morgan · 10:38</strong><br/>The onboarding work is in good shape. I&apos;d like to use next week&apos;s beta to validate activation.</p></div>}{tab === 'Action items' && <div className="space-y-3 pt-6">{actions.map(([title, owner, due]) => <div key={title} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border p-4"><div><p className="text-sm font-medium">{title}</p><p className="mt-1 text-xs text-muted-foreground">{owner}</p></div><span className="text-xs text-primary">{due}</span></div>)}</div>}<div className="mt-8 flex items-center justify-between border-t border-border pt-5"><span className="flex items-center gap-2 text-xs text-muted-foreground"><FileAudio size={15}/> Processed with Sonora AI</span><button className="inline-flex items-center gap-2 text-sm font-semibold text-primary"><Play size={15} fill="currentColor"/> Play recording</button></div></section>
+            <aside className="space-y-6"><section className="rounded-2xl border border-border bg-card p-5"><div className="flex items-center justify-between"><h3 className="font-semibold">Recent meetings</h3><button className="text-xs font-semibold text-primary">View all</button></div><div className="mt-4 flex items-center gap-2 rounded-lg bg-accent px-3 py-2"><Search size={15} className="text-muted-foreground"/><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search meetings" className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"/></div><div className="mt-3 divide-y divide-border">{filtered.map((meeting) => <button key={meeting.title} className={`flex w-full items-start gap-3 py-4 text-left ${meeting.active ? 'text-foreground' : 'text-muted-foreground'}`}><span className="mt-1 grid size-8 shrink-0 place-items-center rounded-lg bg-accent"><FileAudio size={15}/></span><span className="min-w-0"><span className="block truncate text-sm font-medium">{meeting.title}</span><span className="mt-1 block text-xs">{meeting.date} · {meeting.duration}</span></span></button>)}</div></section><section className="rounded-2xl bg-primary p-6 text-primary-foreground"><Sparkles size={20}/><h3 className="mt-5 text-xl font-semibold tracking-tight">Turn conversations into momentum.</h3><p className="mt-2 text-sm leading-6 text-primary-foreground/75">Sonora finds the signal, so your team can focus on the work.</p><button className="mt-5 rounded-lg bg-primary-foreground px-4 py-2 text-sm font-semibold text-primary">Explore insights</button></section></aside></div>
+        </div></section>
+    </div>
+  </main>
 }
+function Nav({ icon, label, active, badge }: { icon: React.ReactNode; label: string; active?: boolean; badge?: string }) { return <button className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm ${active ? 'bg-accent font-semibold text-foreground' : 'text-muted-foreground hover:bg-accent/70'}`}>{icon}<span className="flex-1 text-left">{label}</span>{badge && <span className="text-xs">{badge}</span>}</button> }
+function Stat({ label, value, change, icon }: { label: string; value: string; change: string; icon: React.ReactNode }) { return <div className="rounded-2xl border border-border bg-card p-5"><div className="flex items-center justify-between"><span className="text-sm text-muted-foreground">{label}</span><span className="text-primary">{icon}</span></div><div className="mt-4 flex items-end justify-between"><strong className="text-3xl font-semibold tracking-tight">{value}</strong><span className="text-xs font-medium text-primary">{change}</span></div></div> }
